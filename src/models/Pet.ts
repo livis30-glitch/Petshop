@@ -2,7 +2,7 @@ import supabase from "../config/supabase.js";
 
 async function findAll() {
     const {data, error} = await supabase
-        .from("clientes")
+        .from("pets")
         .select("*");
 
     if (error) {
@@ -13,47 +13,50 @@ async function findAll() {
 
 async function findById(id: string) {
     const {data, error} = await supabase
-        .from("clientes")
+        .from("pets")
         .select("*")
         .eq("id", id)
         .single();
-
+    
     if (error) {
         throw error;
     }
     return data;
 }
 
-async function create(cliente: {
+async function create(pet: {
+    cliente_id: string;
     nome: string;
-    email: string;
-    telefone: string;
+    especie: string;
+    raca: string;
+    idade: number;
     activo: boolean;
 }) {
     const {data, error} = await supabase
-        .from("clientes")
-        .insert(cliente)
+        .from("pets")
+        .insert(pet)
         .select()
         .single();
-
-    if (error){
+    if (error) {
         throw error;
     }
     return data;
-}
+}  
 
 async function update(
     id: string, 
-    cliente: {
+    pet: {
+        cliente_id: string;
         nome: string;
-        email: string;
-        telefone: string;
+        especie: string;
+        raca: string;
+        idade: number;
         activo: boolean;
     }
 ){
     const {data, error} = await supabase
-        .from("clientes")
-        .update(cliente)
+        .from("pets")
+        .update(pet)
         .eq("id", id)
         .select()
         .single();
@@ -66,11 +69,11 @@ async function update(
 
 async function remove(id: string) {
     const {data, error} = await supabase
-        .from("clientes")
+        .from("pets")
         .delete()
         .eq("id", id)
         .single();
-    
+
     if (error) {
         throw error;
     }
@@ -83,4 +86,4 @@ export default {
     create,
     update,
     remove
-};
+}
