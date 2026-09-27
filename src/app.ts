@@ -1,10 +1,10 @@
 import express from "express";
-import Cliente from "./models/Cliente.js";
-import Pet from "./models/Pet.js";
-
+import clienteRoutes from "./routes/Clientesroutes.js";
+import petRoutes from "./routes/Petroutes.js";
+ 
 const app = express();
 app.use(express.json());
-
+ 
 // =================
 // Root
 // =================
@@ -14,5 +14,15 @@ app.get("/", (req, res) => {
         version: "1.0.0"
     });
 });
-
+ 
+// =================
+// Clientes
+// =================
+app.use("/clientes", clienteRoutes);
+ 
+// =================
+// Pets
+// =================
+app.use("/pets", petRoutes);
+ 
 export default app;

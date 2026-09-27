@@ -77,10 +77,24 @@ async function remove(id: string) {
     return data;
 }
 
+async function searchByKeyword(keyword: string) {
+    const {data, error} = await supabase
+        .from("clientes")
+        .select("*")
+        .or(`nome.ilike.%${keyword}%,email.ilike.%${keyword}%,telefone.ilike.%${keyword}%`)
+        .order("nome", {ascending: true});
+
+    if (error) {
+        throw error;
+    }
+    return data;
+}
+
 export default {
     findAll,
     findById,
     create,
     update,
-    remove
+    remove,
+    searchByKeyword
 };
