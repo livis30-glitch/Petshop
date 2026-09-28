@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
  
 // =================
-// Root
+//  Root
 // =================
 app.get("/", (req, res) => {
     res.status(200).json({
