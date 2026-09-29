@@ -21,7 +21,8 @@ async function getByKeyword(req: Request<{ keyword: string }>, res: Response) {
     if (!keyword || typeof keyword != "string") {
         res.status(400).json({
             message: "Palavra-chave não informada."
-        })
+        });
+        return;
     }
 
     try {
@@ -43,7 +44,8 @@ async function getById(req: Request<{ id: string }>, res: Response) {
     if (!id) {
         res.status(404).json({
             message: "ID do Pet não informado."
-        })
+        });
+        return;
     }
 
     try {
@@ -103,7 +105,8 @@ async function update(req: Request<{ id: string }>, res: Response) {
     if (!id) {
         res.status(404).json({
             message: "ID do Pet não informado."
-        })
+        });
+        return;
     }
 
     if (!nome || typeof nome != "string") {
@@ -146,7 +149,8 @@ async function remove(req: Request<{ id: string }>, res: Response) {
     if (!id) {
         res.status(404).json({
             message: "ID do Pet não informado."
-        })
+        });
+        return;
     }
 
     try {
