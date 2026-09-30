@@ -62,6 +62,29 @@ async function getById(req: Request<{ id: string }>, res: Response) {
 }
 
 async function create(req: Request, res: Response) {
+    const { nome, especie, cliente_id } = req.body;
+
+    if (!nome || typeof nome != "string") {
+        res.status(400).json({
+            message: "Nome do pet é obrigatório."
+        });
+        return;
+    }
+
+    if (!especie || typeof especie != "string") {
+        res.status(400).json({
+            message: "Espécie do pet é obrigatória."
+        });
+        return;
+    }
+
+    if (!cliente_id || typeof cliente_id != "string") {
+        res.status(400).json({
+            message: "cliente_id é obrigatório."
+        });
+        return;
+    }
+
     try {
         const pet = await Pet.create(req.body);
 
@@ -77,10 +100,32 @@ async function create(req: Request, res: Response) {
 
 async function update(req: Request<{ id: string }>, res: Response) {
     const { id } = req.params;
+    const { nome, especie, cliente_id } = req.body;
 
     if (!id) {
         res.status(404).json({
             message: "ID do Pet não informado."
+        });
+        return;
+    }
+
+    if (!nome || typeof nome != "string") {
+        res.status(400).json({
+            message: "Nome do pet é obrigatório."
+        });
+        return;
+    }
+
+    if (!especie || typeof especie != "string") {
+        res.status(400).json({
+            message: "Espécie do pet é obrigatória."
+        });
+        return;
+    }
+
+    if (!cliente_id || typeof cliente_id != "string") {
+        res.status(400).json({
+            message: "cliente_id é obrigatório."
         });
         return;
     }

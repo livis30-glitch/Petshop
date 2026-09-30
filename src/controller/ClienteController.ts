@@ -7,10 +7,10 @@ async function getAll(req: Request, res: Response) {
 
         res.status(200).json(clientes);
     } catch (error) {
-        console.error("Erro ao buscar clientes;", error);
+        console.error("Erro ao buscar clientes: ", error);
 
         res.status(500).json({
-            message: "Erro ao buscar clientes",
+            message: "Erro ao buscar clientes.",
         });
     }
 }
@@ -18,11 +18,10 @@ async function getAll(req: Request, res: Response) {
 async function getByKeyword(req: Request<{ keyword: string }>, res: Response) {
     const { keyword } = req.params;
 
-    if (!keyword || typeof keyword !== "string") {
+    if (!keyword || typeof keyword != "string") {
         res.status(400).json({
             message: "Palavra-chave não informada."
-        });
-        return;
+        })
     }
 
     try {
@@ -30,10 +29,10 @@ async function getByKeyword(req: Request<{ keyword: string }>, res: Response) {
 
         res.status(200).json(clientes);
     } catch (error) {
-        console.error("Erro ao buscar por clientes", error);
+        console.error("Erro ao pesquisar por cliente: ", error);
 
         res.status(500).json({
-            message: "Erro ao buscar clientes",
+            message: "Erro ao pesquisar cliente.",
         });
     }
 }
@@ -42,10 +41,9 @@ async function getById(req: Request<{ id: string }>, res: Response) {
     const { id } = req.params;
 
     if (!id) {
-        res.status(400).json({
-            message: "ID do cliente não informado."
-        });
-        return;
+        res.status(404).json({
+            message: "ID do Cliente não informado."
+        })
     }
 
     try {
@@ -53,21 +51,30 @@ async function getById(req: Request<{ id: string }>, res: Response) {
 
         res.status(200).json(cliente);
     } catch (error) {
-        console.error("Erro ao buscar cliente;", error);
+        console.error("Erro ao buscar cliente: ", error);
 
-        res.status(400).json({
+        res.status(404).json({
             message: "Cliente não encontrado.",
         });
     }
 }
 
 async function create(req: Request, res: Response) {
+    const { nome } = req.body;
+
+    if (!nome || typeof nome != "string") {
+        res.status(400).json({
+            message: "Nome do cliente é obrigatório."
+        });
+        return;
+    }
+
     try {
         const cliente = await Cliente.create(req.body);
 
-        res.status(201).json(cliente);
+        res.status(200).json(cliente);
     } catch (error) {
-        console.error("Erro ao criar cliente;", error);
+        console.error("Erro ao criar cliente: ", error);
 
         res.status(500).json({
             message: "Erro ao criar cliente.",
@@ -77,10 +84,17 @@ async function create(req: Request, res: Response) {
 
 async function update(req: Request<{ id: string }>, res: Response) {
     const { id } = req.params;
+    const { nome } = req.body;
 
     if (!id) {
+        res.status(404).json({
+            message: "ID do Cliente não informado."
+        })
+    }
+
+    if (!nome || typeof nome != "string") {
         res.status(400).json({
-            message: "ID do cliente não informado."
+            message: "Nome do cliente é obrigatório."
         });
         return;
     }
@@ -90,7 +104,7 @@ async function update(req: Request<{ id: string }>, res: Response) {
 
         res.status(200).json(cliente);
     } catch (error) {
-        console.error("Erro ao atualizar cliente;", error);
+        console.error("Erro ao atualizar cliente: ", error);
 
         res.status(500).json({
             message: "Erro ao atualizar cliente.",
@@ -103,9 +117,8 @@ async function remove(req: Request<{ id: string }>, res: Response) {
 
     if (!id) {
         res.status(404).json({
-            message: "ID do cliente não informado."
-        });
-        return;
+            message: "ID do Cliente não informado."
+        })
     }
 
     try {
@@ -115,7 +128,7 @@ async function remove(req: Request<{ id: string }>, res: Response) {
             message: "Cliente removido com sucesso.",
         });
     } catch (error) {
-        console.error("Erro ao remover cliente;", error);
+        console.error("Erro ao remover cliente: ", error);
 
         res.status(500).json({
             message: "Erro ao remover cliente.",
@@ -125,9 +138,9 @@ async function remove(req: Request<{ id: string }>, res: Response) {
 
 export default {
     getAll,
-    getByKeyword,
     getById,
+    getByKeyword,
     create,
     update,
     remove
-};
+}
