@@ -6,36 +6,86 @@ API REST para gerenciamento de **clientes** e seus **pets**, desenvolvida com No
 
 ---
 
-##  Índice
+## Índice
 
-- [Tecnologias](#-tecnologias)
-- [Estrutura do projeto](#-estrutura-do-projeto)
-- [Pré-requisitos](#-pré-requisitos)
-- [Instalação e configuração](#-instalação-e-configuração)
-- [Banco de dados](#-banco-de-dados)
-- [Executando o projeto](#-executando-o-projeto)
-- [Endpoints da API](#-endpoints-da-api)
-- [Exemplos de uso](#-exemplos-de-uso)
-- [Códigos de resposta](#-códigos-de-resposta)
-- [Autora](#-autora)
+- [Sobre o projeto](#sobre-o-projeto)
+- [Integrantes da equipe](#integrantes-da-equipe)
+- [Tecnologias](#tecnologias)
+- [Entidades e relacionamento](#entidades-e-relacionamento)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação e configuração](#instalação-e-configuração)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Banco de dados](#banco-de-dados)
+- [Executando o projeto](#executando-o-projeto)
+- [Endpoints da API](#endpoints-da-api)
+- [Exemplos de uso](#exemplos-de-uso)
+- [Códigos de resposta](#códigos-de-resposta)
 
 ---
 
-##  Tecnologias
+## Sobre o projeto
+
+O **PetShop API** é uma API REST para o domínio de **pet shop**. Ela resolve o problema do controle manual de cadastros, permitindo registrar os clientes da loja e os animais (pets) de cada cliente em um banco de dados.
+
+**Objetivo:** oferecer operações completas de cadastro, consulta, atualização e exclusão (CRUD) de clientes e pets, além de pesquisa por palavra-chave, servindo de base para futuras evoluções (agendamentos, serviços, produtos).
+
+---
+
+## Integrantes da equipe
+
+- Lívia Moreira Parra
+- Lohanna Pereira dos Santos
+
+---
+
+## Tecnologias
 
 | Tecnologia | Uso |
 | --- | --- |
 | [Node.js](https://nodejs.org/) | Ambiente de execução |
 | [TypeScript](https://www.typescriptlang.org/) | Linguagem |
 | [Express 5](https://expressjs.com/) | Framework web |
-| [Supabase](https://supabase.com/) (`@supabase/supabase-js`) | Banco de dados PostgreSQL |
+| [Supabase](https://supabase.com/) (`@supabase/supabase-js`) | Plataforma de banco de dados |
+| [PostgreSQL](https://www.postgresql.org/) | Banco de dados relacional (via Supabase) |
 | [tsx](https://tsx.is/) | Execução de TypeScript em desenvolvimento |
 | [dotenv](https://github.com/motdotla/dotenv) | Variáveis de ambiente |
 | [uuid](https://github.com/uuidjs/uuid) | Geração de identificadores |
+| [Git](https://git-scm.com/) | Versionamento de código |
 
 ---
 
-##  Estrutura do projeto
+## Entidades e relacionamento
+
+### Cliente
+
+| Atributo | Tipo | Descrição |
+| --- | --- | --- |
+| id | UUID | Identificador único |
+| nome | texto | Nome do cliente |
+| email | texto | E-mail do cliente |
+| telefone | texto | Telefone do cliente |
+| activo | booleano | Indica se o cliente está ativo |
+
+### Pet
+
+| Atributo | Tipo | Descrição |
+| --- | --- | --- |
+| id | UUID | Identificador único |
+| cliente_id | UUID | Chave estrangeira para `clientes.id` |
+| nome | texto | Nome do pet |
+| especie | texto | Espécie (cachorro, gato...) |
+| raca | texto | Raça do pet |
+| idade | inteiro | Idade do pet |
+| activo | booleano | Indica se o pet está ativo |
+
+### Relacionamento
+
+Um **Cliente** pode possuir vários **Pets**, e cada **Pet** pertence a um único **Cliente** (relação 1:N), por meio da chave estrangeira `pets.cliente_id`.
+
+---
+
+## Estrutura do projeto
 
 O projeto segue uma organização em camadas (rotas → controllers → models):
 
@@ -55,7 +105,8 @@ PetShop/
 │   │   └── Petroutes.ts         # Rotas de /pets
 │   ├── app.ts                   # Configuração do Express e registro das rotas
 │   └── server.ts                # Inicialização do servidor
-├── .env                         # Variáveis de ambiente (não versionado)
+├── .env                         # Variáveis de ambiente reais (não versionado)
+├── .env.example                 # Modelo das variáveis de ambiente
 ├── .gitignore
 ├── package.json
 └── tsconfig.json
@@ -63,7 +114,7 @@ PetShop/
 
 ---
 
-##  Pré-requisitos
+## Pré-requisitos
 
 - **Node.js 20.6 ou superior** (o script de desenvolvimento usa a flag `--env-file`)
 - **npm**
@@ -71,35 +122,46 @@ PetShop/
 
 ---
 
-## ⚙️ Instalação e configuração
+## Instalação e configuração
 
 1. **Clone o repositório e acesse a pasta:**
 
 ```bash
-   git clone <url-do-repositorio>
-   cd PetShop
+git clone https://github.com/livis30-glitch/Petshop.git
+cd Petshop
 ```
 
 2. **Instale as dependências:**
 
 ```bash
-   npm install
+npm install
 ```
 
-3. **Crie o arquivo `.env`** na raiz do projeto com as credenciais do seu projeto Supabase:
-
-```env
-   SUPABASE_URL=https://seu-projeto.supabase.co
-   SUPABASE_SECRET_KEY=sua-chave-secreta
-```
-
-   >  **Nunca** compartilhe nem versione a `SUPABASE_SECRET_KEY`. O arquivo `.env` já está listado no `.gitignore`.
+3. **Configure as variáveis de ambiente:** copie o arquivo `.env.example` para `.env` e preencha com as credenciais do seu projeto Supabase (veja a próxima seção).
 
 ---
 
-## 🗄 Banco de dados
+## Variáveis de ambiente
 
-A API espera duas tabelas no Supabase. Abaixo, uma sugestão de script SQL baseada nos campos usados pelo código (ajuste tipos e restrições conforme a sua necessidade):
+| Variável | Descrição |
+| --- | --- |
+| `SUPABASE_URL` | URL do projeto no Supabase |
+| `SUPABASE_SECRET_KEY` | Chave secreta do Supabase |
+
+Exemplo do arquivo `.env`:
+
+```env
+SUPABASE_URL=https://seu-projeto.supabase.co
+SUPABASE_SECRET_KEY=sua-chave-secreta
+```
+
+> **Nunca** compartilhe nem versione a `SUPABASE_SECRET_KEY`. O arquivo `.env` já está listado no `.gitignore`. Apenas o `.env.example`, sem credenciais reais, fica no repositório.
+
+---
+
+## Banco de dados
+
+A API utiliza duas tabelas no Supabase. Script SQL para criar a estrutura:
 
 ```sql
 create table clientes (
@@ -125,7 +187,7 @@ create table pets (
 
 ---
 
-##  Executando o projeto
+## Executando o projeto
 
 ### Desenvolvimento (com recarga automática)
 
@@ -154,7 +216,7 @@ O servidor sobe em: **http://localhost:3000**
 
 ---
 
-##  Endpoints da API
+## Endpoints da API
 
 ### Raiz
 
@@ -210,7 +272,7 @@ O servidor sobe em: **http://localhost:3000**
 
 ---
 
-##  Exemplos de uso
+## Exemplos de uso
 
 **Criar um cliente**
 
@@ -259,9 +321,5 @@ As mensagens de erro são retornadas em JSON no formato:
 ```
 
 ---
-
-##  Autora
-
-**Lívia Moreira Parra e Lohanna Pereira dos Santos**
 
 Licença: ISC
