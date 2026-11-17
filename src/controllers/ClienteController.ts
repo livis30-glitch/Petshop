@@ -1,146 +1,68 @@
 import type { Request, Response } from "express";
-import Cliente from "../models/Cliente.js";
+import ClienteService from "../services/ClienteService.js";
+import { handleError } from "../errors/handleError.js";
 
-async function getAll(req: Request, res: Response) {
+const service = new ClienteService();
+
+async function findAll(req: Request, res: Response): Promise<void> {
     try {
-        const clientes = await Cliente.findAll();
-
+        const clientes = await service.listar();
         res.status(200).json(clientes);
     } catch (error) {
-        console.error("Erro ao buscar clientes: ", error);
-
-        res.status(500).json({
-            message: "Erro ao buscar clientes.",
-        });
+        handleError(error, res);
     }
 }
 
-async function getByKeyword(req: Request<{ keyword: string }>, res: Response) {
-    const { keyword } = req.params;
-
-    if (!keyword || typeof keyword != "string") {
-        res.status(400).json({
-            message: "Palavra-chave não informada."
-        })
-    }
-
+async function searchByKeyword(req: Request<{ keyword: string }>, res: Response): Promise<void> {
     try {
-        const clientes = await Cliente.searchByKeyword(keyword);
-
+        const clientes = await service.buscarPorPalavra(req.params.keyword);
         res.status(200).json(clientes);
     } catch (error) {
-        console.error("Erro ao pesquisar por cliente: ", error);
-
-        res.status(500).json({
-            message: "Erro ao pesquisar cliente.",
-        });
+        handleError(error, res);
     }
 }
 
-async function getById(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-
-    if (!id) {
-        res.status(404).json({
-            message: "ID do Cliente não informado."
-        })
-    }
-
+async function findById(req: Request<{ id: string }>, res: Response): Promise<void> {
     try {
-        const cliente = await Cliente.findById(id);
-
+        const cliente = await service.buscarPorId(req.params.id);
         res.status(200).json(cliente);
     } catch (error) {
-        console.error("Erro ao buscar cliente: ", error);
-
-        res.status(404).json({
-            message: "Cliente não encontrado.",
-        });
+        handleError(error, res);
     }
 }
 
-async function create(req: Request, res: Response) {
-    const { nome } = req.body;
-
-    if (!nome || typeof nome != "string") {
-        res.status(400).json({
-            message: "Nome do cliente é obrigatório."
-        });
-        return;
-    }
-
+async function create(req: Request, res: Response): Promise<void> {
     try {
-        const cliente = await Cliente.create(req.body);
+        const cliente = await service.criar(req.body ?? {});
+        res.status(201).json(cliente);
+    } catch (error) {
+        handleError(error, res);
+    }
+}
 
+async function update(req: Request<{ id: string }>, res: Response): Promise<void> {
+    try {
+        const cliente = await service.atualizar(req.params.id, req.body ?? {});
         res.status(200).json(cliente);
     } catch (error) {
-        console.error("Erro ao criar cliente: ", error);
-
-        res.status(500).json({
-            message: "Erro ao criar cliente.",
-        });
+        handleError(error, res);
     }
 }
 
-async function update(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-    const { nome } = req.body;
-
-    if (!id) {
-        res.status(404).json({
-            message: "ID do Cliente não informado."
-        })
-    }
-
-    if (!nome || typeof nome != "string") {
-        res.status(400).json({
-            message: "Nome do cliente é obrigatório."
-        });
-        return;
-    }
-
+async function remove(req: Request<{ id: string }>, res: Response): Promise<void> {
     try {
-        const cliente = await Cliente.update(id, req.body);
-
-        res.status(200).json(cliente);
+        await service.remover(req.params.id);
+        res.status(200).json({ mensagem: "Cliente excluído com sucesso." });
     } catch (error) {
-        console.error("Erro ao atualizar cliente: ", error);
-
-        res.status(500).json({
-            message: "Erro ao atualizar cliente.",
-        });
-    }
-}
-
-async function remove(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-
-    if (!id) {
-        res.status(404).json({
-            message: "ID do Cliente não informado."
-        })
-    }
-
-    try {
-        await Cliente.remove(id);
-
-        res.status(200).json({
-            message: "Cliente removido com sucesso.",
-        });
-    } catch (error) {
-        console.error("Erro ao remover cliente: ", error);
-
-        res.status(500).json({
-            message: "Erro ao remover cliente.",
-        });
+        handleError(error, res);
     }
 }
 
 export default {
-    getAll,
-    getById,
-    getByKeyword,
+    findAll,
+    searchByKeyword,
+    findById,
     create,
     update,
     remove
-}
+};

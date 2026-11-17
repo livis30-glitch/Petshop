@@ -3,9 +3,9 @@ import ClienteController from "../controllers/ClienteController.js";
 
 const router = Router();
 
-router.get("/", ClienteController.getAll);
-router.get("/search/:keyword", ClienteController.getByKeyword);
-router.get("/:id", ClienteController.getById);
+router.get("/", ClienteController.findAll);
+router.get("/search/:keyword", ClienteController.searchByKeyword);
+router.get("/:id", ClienteController.findById);
 router.post("/", ClienteController.create);
 router.put("/:id", ClienteController.update);
 router.delete("/:id", ClienteController.remove);

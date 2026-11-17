@@ -1,178 +1,68 @@
 import type { Request, Response } from "express";
-import Pet from "../models/Pet.js";
+import PetService from "../services/PetService.js";
+import { handleError } from "../errors/handleError.js";
 
-async function getAll(req: Request, res: Response) {
+const service = new PetService();
+
+async function findAll(req: Request, res: Response): Promise<void> {
     try {
-        const pets = await Pet.findAll();
-
+        const pets = await service.listar();
         res.status(200).json(pets);
     } catch (error) {
-        console.error("Erro ao buscar pets: ", error);
-
-        res.status(500).json({
-            message: "Erro ao buscar pets.",
-        });
+        handleError(error, res);
     }
 }
 
-async function getByKeyword(req: Request<{ keyword: string }>, res: Response) {
-    const { keyword } = req.params;
-
-    if (!keyword || typeof keyword != "string") {
-        res.status(400).json({
-            message: "Palavra-chave não informada."
-        });
-        return;
-    }
-
+async function searchByKeyword(req: Request<{ keyword: string }>, res: Response): Promise<void> {
     try {
-        const pets = await Pet.searchByKeyword(keyword);
-
+        const pets = await service.buscarPorPalavra(req.params.keyword);
         res.status(200).json(pets);
     } catch (error) {
-        console.error("Erro ao pesquisar por pet: ", error);
-
-        res.status(500).json({
-            message: "Erro ao pesquisar pet.",
-        });
+        handleError(error, res);
     }
 }
 
-async function getById(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-
-    if (!id) {
-        res.status(404).json({
-            message: "ID do Pet não informado."
-        });
-        return;
-    }
-
+async function findById(req: Request<{ id: string }>, res: Response): Promise<void> {
     try {
-        const pet = await Pet.findById(id);
-
+        const pet = await service.buscarPorId(req.params.id);
         res.status(200).json(pet);
     } catch (error) {
-        console.error("Erro ao buscar pet: ", error);
-
-        res.status(404).json({
-            message: "Pet não encontrado.",
-        });
+        handleError(error, res);
     }
 }
 
-async function create(req: Request, res: Response) {
-    const { nome, especie, cliente_id } = req.body;
-
-    if (!nome || typeof nome != "string") {
-        res.status(400).json({
-            message: "Nome do pet é obrigatório."
-        });
-        return;
-    }
-
-    if (!especie || typeof especie != "string") {
-        res.status(400).json({
-            message: "Espécie do pet é obrigatória."
-        });
-        return;
-    }
-
-    if (!cliente_id || typeof cliente_id != "string") {
-        res.status(400).json({
-            message: "cliente_id é obrigatório."
-        });
-        return;
-    }
-
+async function create(req: Request, res: Response): Promise<void> {
     try {
-        const pet = await Pet.create(req.body);
+        const pet = await service.criar(req.body ?? {});
+        res.status(201).json(pet);
+    } catch (error) {
+        handleError(error, res);
+    }
+}
 
+async function update(req: Request<{ id: string }>, res: Response): Promise<void> {
+    try {
+        const pet = await service.atualizar(req.params.id, req.body ?? {});
         res.status(200).json(pet);
     } catch (error) {
-        console.error("Erro ao criar pet: ", error);
-
-        res.status(500).json({
-            message: "Erro ao criar pet.",
-        });
+        handleError(error, res);
     }
 }
 
-async function update(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-    const { nome, especie, cliente_id } = req.body;
-
-    if (!id) {
-        res.status(404).json({
-            message: "ID do Pet não informado."
-        });
-        return;
-    }
-
-    if (!nome || typeof nome != "string") {
-        res.status(400).json({
-            message: "Nome do pet é obrigatório."
-        });
-        return;
-    }
-
-    if (!especie || typeof especie != "string") {
-        res.status(400).json({
-            message: "Espécie do pet é obrigatória."
-        });
-        return;
-    }
-
-    if (!cliente_id || typeof cliente_id != "string") {
-        res.status(400).json({
-            message: "cliente_id é obrigatório."
-        });
-        return;
-    }
-
+async function remove(req: Request<{ id: string }>, res: Response): Promise<void> {
     try {
-        const pet = await Pet.update(id, req.body);
-
-        res.status(200).json(pet);
+        await service.remover(req.params.id);
+        res.status(200).json({ mensagem: "Pet excluído com sucesso." });
     } catch (error) {
-        console.error("Erro ao atualizar pet: ", error);
-
-        res.status(500).json({
-            message: "Erro ao atualizar pet.",
-        });
-    }
-}
-
-async function remove(req: Request<{ id: string }>, res: Response) {
-    const { id } = req.params;
-
-    if (!id) {
-        res.status(404).json({
-            message: "ID do Pet não informado."
-        });
-        return;
-    }
-
-    try {
-        await Pet.remove(id);
-
-        res.status(200).json({
-            message: "Pet removido com sucesso.",
-        });
-    } catch (error) {
-        console.error("Erro ao remover pet: ", error);
-
-        res.status(500).json({
-            message: "Erro ao remover pet.",
-        });
+        handleError(error, res);
     }
 }
 
 export default {
-    getAll,
-    getById,
-    getByKeyword,
+    findAll,
+    searchByKeyword,
+    findById,
     create,
     update,
     remove
-}
+};
