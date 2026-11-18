@@ -1,5 +1,4 @@
-
-import { ValidationError } from "../errors/AppError.js";
+import { ValidationError } from "../errors/ValidationError.js";
 import { ehEmailValido, ehTelefoneValido, ehTextoValido, normalizarEmail } from "../utils/validators.js";
 
 export interface ClienteProps {
