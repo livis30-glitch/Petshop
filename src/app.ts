@@ -25,5 +25,10 @@ app.use("/clientes", clienteRoutes);
 // Pets
 // =================
 app.use("/pets", petRoutes);
+
+// =================
+// Agendamentos
+// =================
+app.use("/agendamentos", agendamentoRoutes);
  
 export default app;
