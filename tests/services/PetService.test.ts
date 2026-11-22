@@ -5,6 +5,7 @@ import Cliente from "../../src/models/Cliente.js";
 import type PetRepository from "../../src/repositories/PetRepository.js";
 import type ClienteRepository from "../../src/repositories/ClienteRepository.js";
 import { ConflictError, NotFoundError, ValidationError } from "../../src/errors/AppError.js";
+vi.mock("../../src/config/supabase.js", () => ({ default: {} }));
 
 const CLIENTE_ID = "123e4567-e89b-12d3-a456-426614174000";
 const OUTRO_CLIENTE_ID = "223e4567-e89b-12d3-a456-426614174001";
