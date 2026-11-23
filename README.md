@@ -1,8 +1,8 @@
-# PetShop API
+# Petshop API
 
-API REST para gerenciamento de **clientes** e seus **pets**, desenvolvida com Node.js, Express e TypeScript, utilizando o **Supabase** (PostgreSQL) como banco de dados.
+API REST para gerenciamento de **clientes**, **pets** e **agendamentos** de um pet shop, desenvolvida com Node.js, Express e TypeScript, utilizando o **Supabase** (PostgreSQL) como banco de dados.
 
-> Trabalho da disciplina de **Desenvolvimento Back-End** — Engenharia de Software, 4P, Turma B (sex).
+> Trabalho da disciplina de **Desenvolvimento Back-End** — Engenharia de Software, 4P, Turma B (sex). Avaliação Final (2ª parte), baseada no projeto `restaurant-ordering-system` do professor, com a camada de **Services** acrescentada.
 
 ---
 
@@ -12,12 +12,15 @@ API REST para gerenciamento de **clientes** e seus **pets**, desenvolvida com No
 - [Integrantes da equipe](#integrantes-da-equipe)
 - [Tecnologias](#tecnologias)
 - [Entidades e relacionamento](#entidades-e-relacionamento)
-- [Estrutura do projeto](#estrutura-do-projeto)
+- [Regras de negócio](#regras-de-negócio)
+- [Arquitetura e estrutura do projeto](#arquitetura-e-estrutura-do-projeto)
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação e configuração](#instalação-e-configuração)
 - [Variáveis de ambiente](#variáveis-de-ambiente)
 - [Banco de dados](#banco-de-dados)
 - [Executando o projeto](#executando-o-projeto)
+- [Testes e cobertura](#testes-e-cobertura)
+- [Documentação Swagger](#documentação-swagger)
 - [Endpoints da API](#endpoints-da-api)
 - [Exemplos de uso](#exemplos-de-uso)
 - [Códigos de resposta](#códigos-de-resposta)
@@ -26,9 +29,9 @@ API REST para gerenciamento de **clientes** e seus **pets**, desenvolvida com No
 
 ## Sobre o projeto
 
-O **PetShop API** é uma API REST para o domínio de **pet shop**. Ela resolve o problema do controle manual de cadastros, permitindo registrar os clientes da loja e os animais (pets) de cada cliente em um banco de dados.
+A **Petshop API** resolve o problema do controle manual de um pet shop: registrar os clientes, os animais (pets) de cada cliente e os agendamentos de serviços (banho, tosa, consulta etc.), tudo em um banco de dados com regras que evitam registros inconsistentes.
 
-**Objetivo:** oferecer operações completas de cadastro, consulta, atualização e exclusão (CRUD) de clientes e pets, além de pesquisa por palavra-chave, servindo de base para futuras evoluções (agendamentos, serviços, produtos).
+**Objetivo:** oferecer operações completas de cadastro, consulta, atualização e exclusão (CRUD) das três entidades, com pesquisa por palavra-chave, regras de negócio nos services, testes automatizados e documentação interativa.
 
 ---
 
@@ -48,9 +51,10 @@ O **PetShop API** é uma API REST para o domínio de **pet shop**. Ela resolve o
 | [Express 5](https://expressjs.com/) | Framework web |
 | [Supabase](https://supabase.com/) (`@supabase/supabase-js`) | Plataforma de banco de dados |
 | [PostgreSQL](https://www.postgresql.org/) | Banco de dados relacional (via Supabase) |
+| [Vitest](https://vitest.dev/) | Testes unitários e cobertura |
+| [Supertest](https://github.com/ladjs/supertest) | Testes de integração da API |
+| [Swagger UI Express](https://github.com/scottie1984/swagger-ui-express) | Documentação interativa (OpenAPI 3) |
 | [tsx](https://tsx.is/) | Execução de TypeScript em desenvolvimento |
-| [dotenv](https://github.com/motdotla/dotenv) | Variáveis de ambiente |
-| [uuid](https://github.com/uuidjs/uuid) | Geração de identificadores |
 | [Git](https://git-scm.com/) | Versionamento de código |
 
 ---
@@ -62,9 +66,9 @@ O **PetShop API** é uma API REST para o domínio de **pet shop**. Ela resolve o
 | Atributo | Tipo | Descrição |
 | --- | --- | --- |
 | id | UUID | Identificador único |
-| nome | texto | Nome do cliente |
-| email | texto | E-mail do cliente |
-| telefone | texto | Telefone do cliente |
+| nome | texto | Nome do cliente (2 a 100 caracteres) |
+| email | texto | E-mail válido e único |
+| telefone | texto | Telefone com DDD |
 | activo | booleano | Indica se o cliente está ativo |
 
 ### Pet
@@ -76,40 +80,84 @@ O **PetShop API** é uma API REST para o domínio de **pet shop**. Ela resolve o
 | nome | texto | Nome do pet |
 | especie | texto | Espécie (cachorro, gato...) |
 | raca | texto | Raça do pet |
-| idade | inteiro | Idade do pet |
+| idade | inteiro | Idade do pet (0 a 50) |
 | activo | booleano | Indica se o pet está ativo |
+
+### Agendamento
+
+| Atributo | Tipo | Descrição |
+| --- | --- | --- |
+| id | UUID | Identificador único |
+| cliente_id | UUID | Chave estrangeira para `clientes.id` |
+| pet_id | UUID | Chave estrangeira para `pets.id` |
+| data_hora | data/hora | Data e hora do atendimento (precisa ser futura) |
+| servico | texto | Serviço contratado |
+| status | texto | `agendado` (padrão), `concluido` ou `cancelado` |
+| observacoes | texto | Observações (opcional) |
 
 ### Relacionamento
 
-Um **Cliente** pode possuir vários **Pets**, e cada **Pet** pertence a um único **Cliente** (relação 1:N), por meio da chave estrangeira `pets.cliente_id`.
+```
+Cliente 1 ──── N Pet 1 ──── N Agendamento
+```
+
+Um **Cliente** possui vários **Pets**, e um **Pet** possui vários **Agendamentos**. Cada agendamento também guarda o `cliente_id`.
 
 ---
 
-## Estrutura do projeto
+## Regras de negócio
 
-O projeto segue uma organização em camadas (rotas → controllers → models):
+- O e-mail do cliente é único e válido; o telefone precisa ter DDD.
+- Não é possível excluir um cliente que tenha pets (`409`).
+- Um pet só pode ser cadastrado para um cliente existente e ativo.
+- Não é possível excluir um pet que tenha agendamentos (`409`).
+- Um agendamento exige cliente e pet existentes e ativos, data futura e horário livre (não pode haver outro agendamento no mesmo horário).
+- Status: somente um agendamento `agendado` pode virar `concluido` ou `cancelado`.
+- Um agendamento `concluido` não pode ser excluído (`409`).
+
+---
+
+## Arquitetura e estrutura do projeto
+
+Fluxo de uma requisição:
 
 ```
-PetShop/
+routes → controllers → services → repositories → models → Supabase
+```
+
+| Camada | Responsabilidade |
+| --- | --- |
+| **routes** | Define as rotas HTTP de cada entidade |
+| **controllers** | Recebe a requisição, chama o service e devolve a resposta (`try/catch` + `handleError`) |
+| **services** | Regras de negócio que envolvem mais de uma entidade (recebem os repositories no construtor, o que facilita mocks nos testes) |
+| **repositories** | Único ponto de acesso ao Supabase; converte erros do banco (chave estrangeira, e-mail repetido) em `ConflictError` |
+| **models** | Classes com campos privados; o construtor valida e lança `ValidationError`; `restore()` monta o objeto vindo do banco |
+
+```
+Petshop/
+├── sql/
+│   └── schema.sql                  # Script SQL das 3 tabelas
 ├── src/
-│   ├── config/
-│   │   └── supabase.ts          # Cliente de conexão com o Supabase
-│   ├── controller/
-│   │   ├── ClienteController.ts # Regras de entrada/saída HTTP de clientes
-│   │   └── PetController.ts     # Regras de entrada/saída HTTP de pets
-│   ├── models/
-│   │   ├── Cliente.ts           # Acesso ao banco (tabela clientes)
-│   │   └── Pet.ts               # Acesso ao banco (tabela pets)
-│   ├── routes/
-│   │   ├── Clientesroutes.ts    # Rotas de /clientes
-│   │   └── Petroutes.ts         # Rotas de /pets
-│   ├── app.ts                   # Configuração do Express e registro das rotas
-│   └── server.ts                # Inicialização do servidor
-├── .env                         # Variáveis de ambiente reais (não versionado)
-├── .env.example                 # Modelo das variáveis de ambiente
-├── .gitignore
+│   ├── config/supabase.ts          # Cliente de conexão com o Supabase
+│   ├── controllers/                # ClienteController, PetController, AgendamentoController
+│   ├── docs/openapi.ts             # Especificação OpenAPI (Swagger)
+│   ├── errors/                     # AppError (+ ValidationError, NotFoundError, ConflictError) e handleError
+│   ├── models/                     # Cliente, Pet, Agendamento
+│   ├── repositories/               # ClienteRepository, PetRepository, AgendamentoRepository
+│   ├── routes/                     # clienteRoutes, petRoutes, agendamentoRoutes
+│   ├── services/                   # ClienteService, PetService, AgendamentoService
+│   ├── utils/validators.ts         # Funções de validação reutilizadas pelos models
+│   ├── app.ts                      # Configuração do Express, rotas e Swagger
+│   └── server.ts                   # Inicialização do servidor
+├── tests/
+│   ├── helpers/fakeSupabase.ts     # Banco falso em memória para os testes de integração
+│   ├── integration/                # Testes de integração (Supertest)
+│   ├── models/                     # Testes unitários dos models
+│   └── services/                   # Testes unitários dos services (repositories mockados)
+├── .env.example                    # Modelo das variáveis de ambiente
 ├── package.json
-└── tsconfig.json
+├── tsconfig.json
+└── vitest.config.ts
 ```
 
 ---
@@ -118,7 +166,7 @@ PetShop/
 
 - **Node.js 20.6 ou superior** (o script de desenvolvimento usa a flag `--env-file`)
 - **npm**
-- Um projeto no [Supabase](https://supabase.com/) com as tabelas `clientes` e `pets`
+- Um projeto no [Supabase](https://supabase.com/)
 
 ---
 
@@ -137,7 +185,14 @@ cd Petshop
 npm install
 ```
 
-3. **Configure as variáveis de ambiente:** copie o arquivo `.env.example` para `.env` e preencha com as credenciais do seu projeto Supabase (veja a próxima seção).
+3. **Configure as variáveis de ambiente:** copie `.env.example` para `.env` e preencha com as credenciais do seu projeto Supabase.
+
+```bash
+copy .env.example .env      # Windows
+cp .env.example .env        # Linux / macOS
+```
+
+4. **Crie as tabelas** no Supabase (veja [Banco de dados](#banco-de-dados)).
 
 ---
 
@@ -148,42 +203,26 @@ npm install
 | `SUPABASE_URL` | URL do projeto no Supabase |
 | `SUPABASE_SECRET_KEY` | Chave secreta do Supabase |
 
-Exemplo do arquivo `.env`:
+Exemplo de `.env`:
 
 ```env
 SUPABASE_URL=https://seu-projeto.supabase.co
 SUPABASE_SECRET_KEY=sua-chave-secreta
 ```
 
-> **Nunca** compartilhe nem versione a `SUPABASE_SECRET_KEY`. O arquivo `.env` já está listado no `.gitignore`. Apenas o `.env.example`, sem credenciais reais, fica no repositório.
+> **Nunca** compartilhe nem versione a `SUPABASE_SECRET_KEY`. O `.env` está no `.gitignore`; apenas o `.env.example`, sem credenciais reais, fica no repositório.
 
 ---
 
 ## Banco de dados
 
-A API utiliza duas tabelas no Supabase. Script SQL para criar a estrutura:
+O script completo está em [`sql/schema.sql`](sql/schema.sql). Para criar a estrutura, abra o **SQL Editor** do Supabase, cole o conteúdo do arquivo e execute.
 
-```sql
-create table clientes (
-  id uuid primary key default gen_random_uuid(),
-  nome text not null,
-  email text not null,
-  telefone text not null,
-  activo boolean not null default true
-);
+O script cria:
 
-create table pets (
-  id uuid primary key default gen_random_uuid(),
-  cliente_id uuid not null references clientes(id),
-  nome text not null,
-  especie text not null,
-  raca text not null,
-  idade integer not null,
-  activo boolean not null default true
-);
-```
-
-**Relacionamento:** um cliente pode ter vários pets (`pets.cliente_id → clientes.id`).
+- `clientes`, com índice único no e-mail (sem diferenciar maiúsculas e minúsculas);
+- `pets`, com chave estrangeira para `clientes`;
+- `agendamentos`, com chaves estrangeiras para `clientes` e `pets`, `status` restrito a `agendado`, `concluido` ou `cancelado` e índice único que impede dois agendamentos não cancelados no mesmo horário.
 
 ---
 
@@ -202,17 +241,44 @@ npm run build   # compila o TypeScript para a pasta dist/
 npm start       # executa dist/server.js
 ```
 
-> Ao usar `npm start`, garanta que as variáveis `SUPABASE_URL` e `SUPABASE_SECRET_KEY` estejam definidas no ambiente.
-
-O servidor sobe em: **http://localhost:3000**
+O servidor sobe em **http://localhost:3000**.
 
 ### Scripts disponíveis
 
 | Script | Descrição |
 | --- | --- |
-| `npm run dev` | Inicia o servidor em modo de desenvolvimento, carregando o `.env` e reiniciando a cada alteração |
+| `npm run dev` | Servidor em modo de desenvolvimento, carregando o `.env` |
 | `npm run build` | Compila o projeto TypeScript |
 | `npm start` | Executa a versão compilada |
+| `npm test` | Executa todos os testes |
+| `npm run test:watch` | Executa os testes em modo de observação |
+| `npm run test:coverage` | Executa os testes e gera o relatório de cobertura |
+
+---
+
+## Testes e cobertura
+
+Os testes usam o **Vitest** e o **Supertest**:
+
+- **Unitários:** models e services, com os repositories mockados (`tests/models/` e `tests/services/`).
+- **Integração:** a API é chamada com Supertest sobre um **banco falso em memória** (`tests/helpers/fakeSupabase.ts`), que simula e-mail único e chaves estrangeiras. Por isso os testes não precisam de internet nem de credenciais do Supabase.
+
+```bash
+npm test
+npm run test:coverage
+```
+
+O comando de cobertura exige no mínimo **60%** (statements, branches, functions e lines), configurado em `vitest.config.ts`. O relatório detalhado em HTML fica em `coverage/index.html`.
+
+---
+
+## Documentação Swagger
+
+Com o servidor rodando, a documentação interativa (OpenAPI 3) fica em:
+
+**http://localhost:3000/api-docs**
+
+Nela é possível ver todos os endpoints, os modelos de dados e as respostas possíveis, e testar as requisições pelo navegador.
 
 ---
 
@@ -229,13 +295,13 @@ O servidor sobe em: **http://localhost:3000**
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | `GET` | `/clientes` | Lista todos os clientes |
-| `GET` | `/clientes/search/:keyword` | Busca por nome, e-mail ou telefone (ordenado por nome) |
+| `GET` | `/clientes/search/:keyword` | Busca por nome, e-mail ou telefone |
 | `GET` | `/clientes/:id` | Busca um cliente pelo ID |
 | `POST` | `/clientes` | Cadastra um novo cliente |
 | `PUT` | `/clientes/:id` | Atualiza um cliente |
-| `DELETE` | `/clientes/:id` | Remove um cliente |
+| `DELETE` | `/clientes/:id` | Remove um cliente (se não tiver pets) |
 
-**Corpo (JSON) para `POST` e `PUT`:**
+Corpo (JSON) para `POST` e `PUT`:
 
 ```json
 {
@@ -251,13 +317,13 @@ O servidor sobe em: **http://localhost:3000**
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | `GET` | `/pets` | Lista todos os pets |
-| `GET` | `/pets/search/:keyword` | Busca por nome, espécie ou raça (ordenado por nome) |
+| `GET` | `/pets/search/:keyword` | Busca por nome, espécie ou raça |
 | `GET` | `/pets/:id` | Busca um pet pelo ID |
 | `POST` | `/pets` | Cadastra um novo pet |
 | `PUT` | `/pets/:id` | Atualiza um pet |
-| `DELETE` | `/pets/:id` | Remove um pet |
+| `DELETE` | `/pets/:id` | Remove um pet (se não tiver agendamentos) |
 
-**Corpo (JSON) para `POST` e `PUT`:**
+Corpo (JSON) para `POST` e `PUT`:
 
 ```json
 {
@@ -270,6 +336,36 @@ O servidor sobe em: **http://localhost:3000**
 }
 ```
 
+### Agendamentos — `/agendamentos`
+
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/agendamentos` | Lista todos os agendamentos |
+| `GET` | `/agendamentos/search/:keyword` | Busca por serviço ou observações |
+| `GET` | `/agendamentos/:id` | Busca um agendamento pelo ID |
+| `POST` | `/agendamentos` | Cria um novo agendamento |
+| `PUT` | `/agendamentos/:id` | Atualiza um agendamento (o status é mantido) |
+| `PATCH` | `/agendamentos/:id/status` | Altera o status para `concluido` ou `cancelado` |
+| `DELETE` | `/agendamentos/:id` | Remove um agendamento (exceto os concluídos) |
+
+Corpo (JSON) para `POST` e `PUT`:
+
+```json
+{
+  "cliente_id": "uuid-do-cliente",
+  "pet_id": "uuid-do-pet",
+  "data_hora": "2026-12-10T14:00:00-03:00",
+  "servico": "Banho e tosa",
+  "observacoes": "Pet com medo de secador"
+}
+```
+
+Corpo (JSON) para `PATCH /agendamentos/:id/status`:
+
+```json
+{ "status": "concluido" }
+```
+
 ---
 
 ## Exemplos de uso
@@ -279,7 +375,7 @@ O servidor sobe em: **http://localhost:3000**
 ```bash
 curl -X POST http://localhost:3000/clientes \
   -H "Content-Type: application/json" \
-  -d '{"nome":"Maria Silva","email":"maria@email.com","telefone":"(41) 99999-0000","activo":true}'
+  -d '{"nome":"Maria Silva","email":"maria@email.com","telefone":"(41) 99999-0000"}'
 ```
 
 **Cadastrar um pet para esse cliente**
@@ -287,19 +383,29 @@ curl -X POST http://localhost:3000/clientes \
 ```bash
 curl -X POST http://localhost:3000/pets \
   -H "Content-Type: application/json" \
-  -d '{"cliente_id":"<ID_DO_CLIENTE>","nome":"Thor","especie":"Cachorro","raca":"Golden Retriever","idade":3,"activo":true}'
+  -d '{"cliente_id":"<ID_DO_CLIENTE>","nome":"Thor","especie":"Cachorro","raca":"Golden Retriever","idade":3}'
+```
+
+**Agendar um serviço**
+
+```bash
+curl -X POST http://localhost:3000/agendamentos \
+  -H "Content-Type: application/json" \
+  -d '{"cliente_id":"<ID_DO_CLIENTE>","pet_id":"<ID_DO_PET>","data_hora":"2026-12-10T14:00:00-03:00","servico":"Banho e tosa"}'
+```
+
+**Concluir um agendamento**
+
+```bash
+curl -X PATCH http://localhost:3000/agendamentos/<ID_DO_AGENDAMENTO>/status \
+  -H "Content-Type: application/json" \
+  -d '{"status":"concluido"}'
 ```
 
 **Pesquisar pets por palavra-chave**
 
 ```bash
 curl http://localhost:3000/pets/search/golden
-```
-
-**Remover um cliente**
-
-```bash
-curl -X DELETE http://localhost:3000/clientes/<ID_DO_CLIENTE>
 ```
 
 ---
@@ -309,15 +415,16 @@ curl -X DELETE http://localhost:3000/clientes/<ID_DO_CLIENTE>
 | Código | Significado |
 | --- | --- |
 | `200` | Requisição realizada com sucesso |
-| `201` | Cliente criado com sucesso |
-| `400` | Parâmetro obrigatório não informado ou cliente não encontrado |
-| `404` | Pet não encontrado ou ID não informado |
+| `201` | Registro criado com sucesso |
+| `400` | Dados inválidos (validação) |
+| `404` | Registro não encontrado |
+| `409` | Conflito com uma regra de negócio (e-mail repetido, horário ocupado, cliente com pets, pet com agendamentos, agendamento concluído etc.) |
 | `500` | Erro interno ao processar a requisição |
 
 As mensagens de erro são retornadas em JSON no formato:
 
 ```json
-{ "message": "Descrição do erro" }
+{ "error": "Descrição do erro" }
 ```
 
 ---
