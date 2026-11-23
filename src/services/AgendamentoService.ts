@@ -111,16 +111,18 @@ export default class AgendamentoService {
     }
 
     private async garantirHorarioLivre(dataHora: string, ignorarId?: string): Promise<void> {
-        const agendamentos = await this.agendamentoRepository.findAll();
+    const agendamentos = await this.agendamentoRepository.findAll();
 
-        const existente = agendamentos.find(
-            (agendamento) =>
-                agendamento.dataHora === dataHora &&
-                agendamento.id !== ignorarId
-        );
+    const alvo = new Date(dataHora).getTime();
+    const existente = agendamentos.find(
+        (agendamento) =>
+            agendamento.id !== ignorarId &&
+            agendamento.status !== "cancelado" &&
+            new Date(agendamento.dataHora).getTime() === alvo
+    );
 
-        if (existente) {
-            throw new ConflictError("Já existe um agendamento para esse horário.");
-        }
+    if (existente) {
+        throw new ConflictError("Já existe um agendamento para esse horário.");
     }
+}
 }
