@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Petshop</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topo">
+    <h1>Petshop</h1>
+    <p>Clientes, pets e agendamentos. Documentação da API em <a href="/api-docs">/api-docs</a></p>
+</div>
+
+<div class="abas">
+    <button id="aba_clientes" onclick="abrirAba('clientes')">Clientes</button>
+    <button id="aba_pets" onclick="abrirAba('pets')">Pets</button>
+    <button id="aba_agendamentos" onclick="abrirAba('agendamentos')">Agendamentos</button>
+    <div class="limpar"></div>
+</div>
+
+<div class="painel">
+    <h2 id="titulo"></h2>
+    <div id="mensagem"></div>
+
+    <div id="campos"></div>
+    <div class="limpar"></div>
+    <button class="acao" id="btnSalvar" onclick="salvar()">Salvar</button>
+    <button class="acao sec" id="btnCancelar" onclick="limparFormulario()">Limpar</button>
+
+    <div class="busca">
+        <input type="text" id="busca" placeholder="Buscar por palavra-chave">
+        <button class="acao" onclick="buscar()">Buscar</button>
+        <button class="acao sec" onclick="listar('')">Ver todos</button>
+    </div>
+
+    <div class="tabela" id="tabela"></div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

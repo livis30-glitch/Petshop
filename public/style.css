@@ -1,0 +1,248 @@
+/* 
+   PETSHOP - FOLHA DE ESTILO
+   Layout feito com float (sem flexbox/grid)
+   Seções:
+   1. Base
+   2. Topo
+   3. Abas
+   4. Painel
+   5. Formulário
+   6. Botões
+   7. Busca
+   8. Mensagens
+   9. Tabela
+   10. Responsivo
+*/
+
+
+/* 
+   1. BASE
+*/
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Trebuchet MS", Verdana, sans-serif;
+    font-size: 15px;
+    color: #1d2b2a;
+    background-color: #eef3f2;
+}
+
+/* Limpa o float dos elementos anteriores */
+.limpar {
+    clear: both;
+}
+
+
+/* 
+   2. TOPO
+*/
+.topo {
+    padding: 18px 4%;
+    color: #ffffff;
+    background-color: #0e5f5a;
+    border-bottom: 5px solid #f2b134;
+}
+
+.topo h1 {
+    margin: 0 0 4px 0;
+    font-size: 26px;
+}
+
+.topo p {
+    margin: 0;
+    font-size: 14px;
+    color: #cfe6e3;
+}
+
+.topo a {
+    color: #f2b134;
+}
+
+
+/* 
+   3. ABAS
+ */
+.abas {
+    padding: 14px 4% 0 4%;
+}
+
+.abas button {
+    float: left;
+    margin-right: 6px;
+    padding: 10px 22px;
+    border: 0;
+    font: inherit;
+    color: #0e5f5a;
+    background-color: #cfe0de;
+    cursor: pointer;
+}
+
+.abas button.ativa {
+    font-weight: bold;
+    background-color: #ffffff;
+}
+
+
+/* 
+   4. PAINEL
+*/
+.painel {
+    margin: 0 4% 30px 4%;
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+.painel h2 {
+    margin: 0 0 14px 0;
+    font-size: 20px;
+}
+
+
+/* 
+   5. FORMULÁRIO
+   Três campos por linha, lado a lado com float
+*/
+.campo {
+    float: left;
+    width: 31.3%;
+    margin: 0 1% 12px 1%;
+}
+
+.campo label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+}
+
+.campo input[type=text],
+.campo input[type=email],
+.campo input[type=number],
+.campo input[type=datetime-local],
+.campo select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #9db5b2;
+    font: inherit;
+}
+
+
+/* 
+   6. BOTÕES
+*/
+
+/* Botão principal (Salvar, Buscar...) */
+button.acao {
+    margin-right: 6px;
+    padding: 9px 18px;
+    border: 0;
+    font: inherit;
+    color: #ffffff;
+    background-color: #0e5f5a;
+    cursor: pointer;
+}
+
+/* Botão pequeno da tabela (Editar, Excluir...) */
+button.mini {
+    margin-right: 3px;
+    padding: 4px 9px;
+    border: 0;
+    font: inherit;
+    font-size: 13px;
+    color: #ffffff;
+    background-color: #0e5f5a;
+    cursor: pointer;
+}
+
+/* Variações de cor */
+button.sec {
+    background-color: #6b7f7d;
+}
+
+button.perigo {
+    background-color: #b3382c;
+}
+
+button.ok {
+    background-color: #2f7d32;
+}
+
+
+/* =====================================================
+   7. BUSCA
+*/
+.busca {
+    margin: 18px 0 10px 0;
+}
+
+.busca input {
+    width: 260px;
+    padding: 8px;
+    border: 1px solid #9db5b2;
+    font: inherit;
+}
+
+
+/* 
+   8. MENSAGENS
+*/
+.msg {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+}
+
+.msg.ok {
+    color: #1f5a22;
+    background-color: #dff1df;
+}
+
+.msg.erro {
+    color: #8a2a20;
+    background-color: #f8dcd8;
+}
+
+
+/* 
+   9. TABELA
+ */
+.tabela {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 8px;
+    font-weight: normal;
+    text-align: left;
+    color: #ffffff;
+    background-color: #0e5f5a;
+}
+
+td {
+    padding: 8px;
+    border-bottom: 1px solid #d5e1df;
+    vertical-align: top;
+}
+
+.vazio {
+    padding: 14px;
+    color: #5b6f6d;
+}
+
+
+/* 
+   10. RESPONSIVO
+   Em telas pequenas, um campo por linha
+ */
+@media (max-width: 700px) {
+    .campo {
+        width: 98%;
+    }
+}
