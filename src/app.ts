@@ -4,6 +4,7 @@ import petRoutes from "./routes/petRoutes.js";
 import agendamentoRoutes from "./routes/agendamentoRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import { openapi } from "./docs/openapi.js";
+import { join } from "node:path";
 
 const app = express();
 app.use(express.json());
@@ -38,4 +39,5 @@ app.use("/agendamentos", agendamentoRoutes);
 // =================
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapi));
  
+app.use("/app", express.static(join(process.cwd(), "public")));
 export default app;
