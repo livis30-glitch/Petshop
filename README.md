@@ -21,6 +21,7 @@ API REST para gerenciamento de **clientes**, **pets** e **agendamentos** de um p
 - [Executando o projeto](#executando-o-projeto)
 - [Testes e cobertura](#testes-e-cobertura)
 - [Documentação Swagger](#documentação-swagger)
+- [Front-end](#front-end)
 - [Endpoints da API](#endpoints-da-api)
 - [Exemplos de uso](#exemplos-de-uso)
 - [Códigos de resposta](#códigos-de-resposta)
@@ -55,6 +56,7 @@ A **Petshop API** resolve o problema do controle manual de um pet shop: registra
 | [Supertest](https://github.com/ladjs/supertest) | Testes de integração da API |
 | [Swagger UI Express](https://github.com/scottie1984/swagger-ui-express) | Documentação interativa (OpenAPI 3) |
 | [tsx](https://tsx.is/) | Execução de TypeScript em desenvolvimento |
+| HTML, CSS e JavaScript | Interface web simples, sem frameworks (pasta `public/`) |
 | [Git](https://git-scm.com/) | Versionamento de código |
 
 ---
@@ -135,6 +137,10 @@ routes → controllers → services → repositories → models → Supabase
 
 ```
 Petshop/
+├── public/                         # Front-end (servido em /app)
+│   ├── index.html                  # Estrutura da página
+│   ├── css/style.css               # Estilos
+│   └── js/app.js                   # Lógica e chamadas à API
 ├── sql/
 │   └── schema.sql                  # Script SQL das 3 tabelas
 ├── src/
@@ -279,6 +285,22 @@ Com o servidor rodando, a documentação interativa (OpenAPI 3) fica em:
 **http://localhost:3000/api-docs**
 
 Nela é possível ver todos os endpoints, os modelos de dados e as respostas possíveis, e testar as requisições pelo navegador.
+
+---
+
+## Front-end
+
+O projeto inclui uma interface web simples, feita só com HTML, CSS e JavaScript, que consome a própria API. Com o servidor rodando, acesse:
+
+**http://localhost:3000/app/**
+
+Pela interface é possível:
+
+- cadastrar, editar, excluir e buscar **clientes**, **pets** e **agendamentos**;
+- concluir ou cancelar um agendamento;
+- ver na tela as mensagens de erro das regras de negócio (e-mail repetido, horário ocupado, cliente com pets etc.).
+
+Os arquivos ficam na pasta `public/` e são servidos pelo Express. Como a página e a API usam o mesmo endereço, não é necessário configurar CORS.
 
 ---
 
