@@ -38,7 +38,14 @@ var entidades = {
 var atual = "clientes";
 var editandoId = "";
 var lista = [];
-var cache = { clientes: [], pets: [] };
+var cache = { clientes: [], pets: [], agendamentos: [] };
+var timerMsg;
+var nomes = { clientes: "cliente", pets: "pet", agendamentos: "agendamento" };
+var subtitulos = {
+    clientes: "Cadastro e consulta de clientes do pet shop",
+    pets: "Animais cadastrados e seus donos",
+    agendamentos: "Serviços agendados, concluídos e cancelados"
+};
 
 function esc(texto) {
     return String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -56,7 +63,11 @@ function pedir(metodo, url, corpo) {
 }
 
 function mostrarMensagem(texto, tipo) {
-    document.getElementById("mensagem").innerHTML = texto ? '<div class="msg ' + tipo + '">' + esc(texto) + "</div>" : "";
+    var area = document.getElementById("mensagem");
+    clearTimeout(timerMsg);
+    if (!texto) { area.innerHTML = ""; return; }
+    area.innerHTML = '<div class="toast ' + tipo + '">' + esc(texto) + "</div>";
+    timerMsg = setTimeout(function () { area.innerHTML = ""; }, 4500);
 }
 
 function abrirAba(chave) {
@@ -66,6 +77,7 @@ function abrirAba(chave) {
         document.getElementById("aba_" + chaves[i]).className = chaves[i] === chave ? "ativa" : "";
     }
     document.getElementById("titulo").innerHTML = entidades[chave].titulo;
+    document.getElementById("subtitulo").innerHTML = subtitulos[chave];
     document.getElementById("busca").value = "";
     mostrarMensagem("", "");
     carregarCache().then(function () {
@@ -80,6 +92,10 @@ function carregarCache() {
         return pedir("GET", "/pets");
     }).then(function (p) {
         cache.pets = p;
+        return pedir("GET", "/agendamentos");
+    }).then(function (a) {
+        cache.agendamentos = a;
+        atualizarResumo();
     }).catch(function (erro) {
         mostrarMensagem(erro.message, "erro");
     });
@@ -114,8 +130,6 @@ function montarFormulario() {
 function limparFormulario() {
     editandoId = "";
     montarFormulario();
-    document.getElementById("btnSalvar").innerHTML = "Salvar";
-    document.getElementById("btnCancelar").innerHTML = "Limpar";
 }
 
 function lerFormulario() {
@@ -148,6 +162,7 @@ function salvar() {
     var requisicao = editandoId ? pedir("PUT", rota + "/" + editandoId, dados) : pedir("POST", rota, dados);
     requisicao.then(function () {
         mostrarMensagem(editandoId ? "Registro atualizado." : "Registro cadastrado.", "ok");
+        fecharModal();
         return carregarCache();
     }).then(function () {
         limparFormulario();
@@ -182,7 +197,7 @@ function nomePorId(fonte, id) {
 function formatar(campo, valor) {
     if (valor === null || valor === undefined || valor === "") { return "-"; }
     if (campo.tipo === "select") { return esc(nomePorId(campo.fonte, valor)); }
-    if (campo.tipo === "checkbox") { return valor ? "Sim" : "Não"; }
+    if (campo.tipo === "checkbox") { return '<span class="selo ' + (valor ? "verde" : "cinza") + '">' + (valor ? "Sim" : "Não") + "</span>"; }
     if (campo.tipo === "datetime-local") { return new Date(valor).toLocaleString("pt-BR"); }
     return esc(valor);
 }
@@ -201,7 +216,7 @@ function desenharTabela() {
         var item = lista[j];
         html += "<tr>";
         for (var k = 0; k < e.campos.length; k++) { html += "<td>" + formatar(e.campos[k], item[e.campos[k].nome]) + "</td>"; }
-        if (e.extras) { html += "<td>" + esc(item.status) + "</td>"; }
+        if (e.extras) { html += '<td><span class="selo ' + (item.status === "concluido" ? "verde" : item.status === "cancelado" ? "cinza" : "amarelo") + '">' + esc(item.status) + "</span></td>"; }
         html += '<td><button class="mini" onclick="editar(\'' + item.id + '\')">Editar</button>';
         if (atual === "agendamentos" && item.status === "agendado") {
             html += '<button class="mini ok" onclick="mudarStatus(\'' + item.id + '\', \'concluido\')">Concluir</button>';
@@ -232,10 +247,7 @@ function editar(id) {
             else if (c.tipo === "datetime-local") { el.value = paraInputData(valor); }
             else { el.value = valor === null ? "" : valor; }
         }
-        document.getElementById("btnSalvar").innerHTML = "Atualizar";
-        document.getElementById("btnCancelar").innerHTML = "Cancelar edição";
-        mostrarMensagem("Editando o registro selecionado.", "ok");
-        window.scrollTo(0, 0);
+        abrirModal("Editar " + nomes[atual]);
     }
 }
 
@@ -259,6 +271,30 @@ function mudarStatus(id, status) {
     }).catch(function (erro) {
         mostrarMensagem(erro.message, "erro");
     });
+}
+
+function novo() {
+    limparFormulario();
+    abrirModal("Novo " + nomes[atual]);
+}
+
+function abrirModal(titulo) {
+    document.getElementById("tituloModal").innerHTML = titulo;
+    document.getElementById("fundo").style.display = "block";
+}
+
+function fecharModal() {
+    document.getElementById("fundo").style.display = "none";
+}
+
+function clicouFundo(evento) {
+    if (evento.target.id === "fundo") { fecharModal(); }
+}
+
+function atualizarResumo() {
+    document.getElementById("n_clientes").innerHTML = cache.clientes.length;
+    document.getElementById("n_pets").innerHTML = cache.pets.length;
+    document.getElementById("n_agendamentos").innerHTML = cache.agendamentos.length;
 }
 
 abrirAba("clientes");

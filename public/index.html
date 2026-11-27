@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Petshop | Painel de gestão</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Menu lateral -->
+<div class="menu">
+    <div class="logo">Petshop<span>Painel de gestão</span></div>
+    <ul>
+        <li><a href="#" id="aba_clientes" onclick="abrirAba('clientes'); return false;">Clientes</a></li>
+        <li><a href="#" id="aba_pets" onclick="abrirAba('pets'); return false;">Pets</a></li>
+        <li><a href="#" id="aba_agendamentos" onclick="abrirAba('agendamentos'); return false;">Agendamentos</a></li>
+    </ul>
+    <div class="menu-rodape">
+        <a href="/api-docs" target="_blank">Documentação da API</a>
+    </div>
+</div>
+
+<!-- Conteúdo principal -->
+<div class="conteudo">
+
+    <div class="cabecalho">
+        <div class="cabecalho-texto">
+            <h1 id="titulo"></h1>
+            <p id="subtitulo"></p>
+        </div>
+        <button class="acao btn-novo" onclick="novo()">+ Novo registro</button>
+        <div class="limpar"></div>
+    </div>
+
+    <div class="resumo">
+        <div class="card-resumo"><span id="n_clientes">0</span><p>Clientes</p></div>
+        <div class="card-resumo"><span id="n_pets">0</span><p>Pets</p></div>
+        <div class="card-resumo ultimo"><span id="n_agendamentos">0</span><p>Agendamentos</p></div>
+        <div class="limpar"></div>
+    </div>
+
+    <div class="caixa">
+        <div class="barra">
+            <input type="text" id="busca" placeholder="Buscar por palavra-chave">
+            <button class="acao" onclick="buscar()">Buscar</button>
+            <button class="acao sec" onclick="listar('')">Ver todos</button>
+            <div class="limpar"></div>
+        </div>
+        <div class="tabela" id="tabela"></div>
+    </div>
+
+</div>
+
+<!-- Avisos -->
+<div id="mensagem"></div>
+
+<!-- Janela do formulário -->
+<div class="fundo" id="fundo" onclick="clicouFundo(event)">
+    <div class="janela">
+        <h2 id="tituloModal"></h2>
+        <div id="campos"></div>
+        <div class="limpar"></div>
+        <div class="rodape-modal">
+            <button class="acao sec" onclick="fecharModal()">Cancelar</button>
+            <button class="acao" id="btnSalvar" onclick="salvar()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

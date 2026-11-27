@@ -1,154 +1,301 @@
-/* 
+/* ==========================================================
    PETSHOP - FOLHA DE ESTILO
-   Layout feito com float (sem flexbox/grid)
+   Layout feito com float e position (sem flexbox/grid)
    Seções:
    1. Base
-   2. Topo
-   3. Abas
-   4. Painel
-   5. Formulário
-   6. Botões
-   7. Busca
-   8. Mensagens
-   9. Tabela
+   2. Menu lateral
+   3. Conteúdo e cabeçalho
+   4. Cards de resumo
+   5. Caixa, busca e tabela
+   6. Selos (status)
+   7. Botões
+   8. Janela do formulário
+   9. Avisos
    10. Responsivo
-*/
+   ========================================================== */
 
 
-/* 
+/* ==========================================================
    1. BASE
-*/
+   ========================================================== */
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    font-family: "Trebuchet MS", Verdana, sans-serif;
+    font-family: "Segoe UI", "Trebuchet MS", Verdana, sans-serif;
     font-size: 15px;
     color: #1d2b2a;
-    background-color: #eef3f2;
+    background-color: #f1f5f5;
 }
 
-/* Limpa o float dos elementos anteriores */
 .limpar {
     clear: both;
 }
 
 
-/* 
-   2. TOPO
-*/
-.topo {
-    padding: 18px 4%;
+/* ==========================================================
+   2. MENU LATERAL
+   ========================================================== */
+.menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 240px;
+    background-color: #0b3f3c;
     color: #ffffff;
-    background-color: #0e5f5a;
-    border-bottom: 5px solid #f2b134;
 }
 
-.topo h1 {
-    margin: 0 0 4px 0;
-    font-size: 26px;
-}
-
-.topo p {
-    margin: 0;
-    font-size: 14px;
-    color: #cfe6e3;
-}
-
-.topo a {
-    color: #f2b134;
-}
-
-
-/* 
-   3. ABAS
- */
-.abas {
-    padding: 14px 4% 0 4%;
-}
-
-.abas button {
-    float: left;
-    margin-right: 6px;
-    padding: 10px 22px;
-    border: 0;
-    font: inherit;
-    color: #0e5f5a;
-    background-color: #cfe0de;
-    cursor: pointer;
-}
-
-.abas button.ativa {
+.logo {
+    padding: 28px 24px 24px 24px;
+    font-size: 24px;
     font-weight: bold;
-    background-color: #ffffff;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #1b5955;
 }
 
-
-/* 
-   4. PAINEL
-*/
-.painel {
-    margin: 0 4% 30px 4%;
-    padding: 20px;
-    background-color: #ffffff;
-}
-
-.painel h2 {
-    margin: 0 0 14px 0;
-    font-size: 20px;
-}
-
-
-/* 
-   5. FORMULÁRIO
-   Três campos por linha, lado a lado com float
-*/
-.campo {
-    float: left;
-    width: 31.3%;
-    margin: 0 1% 12px 1%;
-}
-
-.campo label {
+.logo span {
     display: block;
-    margin-bottom: 4px;
-    font-size: 13px;
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: normal;
+    letter-spacing: 0;
+    color: #8fc2bd;
 }
 
-.campo input[type=text],
-.campo input[type=email],
-.campo input[type=number],
-.campo input[type=datetime-local],
-.campo select {
+.menu ul {
+    margin: 0;
+    padding: 16px 0;
+    list-style: none;
+}
+
+.menu li a {
+    display: block;
+    padding: 13px 24px;
+    color: #cfe6e3;
+    text-decoration: none;
+    border-left: 4px solid transparent;
+}
+
+.menu li a:hover {
+    background-color: #12504c;
+}
+
+.menu li a.ativa {
+    color: #ffffff;
+    font-weight: bold;
+    background-color: #12504c;
+    border-left: 4px solid #f2b134;
+}
+
+.menu-rodape {
+    position: absolute;
+    left: 0;
+    bottom: 0;
     width: 100%;
-    padding: 8px;
-    border: 1px solid #9db5b2;
+    padding: 20px 24px;
+    border-top: 1px solid #1b5955;
+}
+
+.menu-rodape a {
+    font-size: 13px;
+    color: #f2b134;
+    text-decoration: none;
+}
+
+
+/* ==========================================================
+   3. CONTEÚDO E CABEÇALHO
+   ========================================================== */
+.conteudo {
+    margin-left: 240px;
+    padding: 32px 36px;
+}
+
+.cabecalho {
+    margin-bottom: 22px;
+}
+
+.cabecalho-texto {
+    float: left;
+}
+
+.cabecalho h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #0b3f3c;
+}
+
+.cabecalho p {
+    margin: 4px 0 0 0;
+    color: #5b6f6d;
+}
+
+.btn-novo {
+    float: right;
+    margin-top: 6px;
+    padding: 11px 22px;
+    background-color: #f2b134;
+    color: #3a2a00;
+    font-weight: bold;
+}
+
+
+/* ==========================================================
+   4. CARDS DE RESUMO
+   ========================================================== */
+.resumo {
+    margin-bottom: 22px;
+}
+
+.card-resumo {
+    float: left;
+    width: 32%;
+    margin-right: 2%;
+    padding: 18px 22px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    border-top: 4px solid #0e5f5a;
+    box-shadow: 0 2px 8px rgba(11, 63, 60, 0.08);
+}
+
+.card-resumo.ultimo {
+    margin-right: 0;
+}
+
+.card-resumo span {
+    font-size: 32px;
+    font-weight: bold;
+    color: #0e5f5a;
+}
+
+.card-resumo p {
+    margin: 2px 0 0 0;
+    color: #5b6f6d;
+}
+
+
+/* ==========================================================
+   5. CAIXA, BUSCA E TABELA
+   ========================================================== */
+.caixa {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(11, 63, 60, 0.08);
+}
+
+.barra {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e1eaea;
+}
+
+.barra input {
+    float: left;
+    width: 300px;
+    margin-right: 8px;
+    padding: 9px 12px;
+    border: 1px solid #b8cccb;
+    border-radius: 8px;
     font: inherit;
 }
 
+.barra button {
+    float: left;
+    margin-right: 8px;
+}
 
-/* 
-   6. BOTÕES
-*/
+.tabela {
+    width: 100%;
+    overflow-x: auto;
+}
 
-/* Botão principal (Salvar, Buscar...) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 12px 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #5b6f6d;
+    background-color: #f6f9f9;
+}
+
+td {
+    padding: 13px 20px;
+    border-top: 1px solid #e8efef;
+    vertical-align: middle;
+}
+
+tr:hover td {
+    background-color: #f8fbfb;
+}
+
+.vazio {
+    padding: 40px 20px;
+    text-align: center;
+    color: #5b6f6d;
+}
+
+
+/* ==========================================================
+   6. SELOS (STATUS)
+   ========================================================== */
+.selo {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.selo.verde {
+    color: #1f6b24;
+    background-color: #ddf1de;
+}
+
+.selo.amarelo {
+    color: #8a5a00;
+    background-color: #fdeec9;
+}
+
+.selo.cinza {
+    color: #5b6f6d;
+    background-color: #e6ecec;
+}
+
+
+/* ==========================================================
+   7. BOTÕES
+   ========================================================== */
+
+/* Botão principal (Buscar, Salvar...) */
 button.acao {
-    margin-right: 6px;
     padding: 9px 18px;
     border: 0;
+    border-radius: 8px;
     font: inherit;
     color: #ffffff;
     background-color: #0e5f5a;
     cursor: pointer;
+}
+
+button.acao:hover {
+    background-color: #0b4a46;
 }
 
 /* Botão pequeno da tabela (Editar, Excluir...) */
 button.mini {
-    margin-right: 3px;
-    padding: 4px 9px;
+    margin-right: 4px;
+    padding: 5px 11px;
     border: 0;
+    border-radius: 6px;
     font: inherit;
     font-size: 13px;
     color: #ffffff;
@@ -170,78 +317,133 @@ button.ok {
 }
 
 
-/* =====================================================
-   7. BUSCA
-*/
-.busca {
-    margin: 18px 0 10px 0;
+/* ==========================================================
+   8. JANELA DO FORMULÁRIO
+   ========================================================== */
+.fundo {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    overflow-y: auto;
+    background-color: rgba(11, 40, 38, 0.6);
 }
 
-.busca input {
-    width: 260px;
-    padding: 8px;
-    border: 1px solid #9db5b2;
+.janela {
+    width: 680px;
+    max-width: 94%;
+    margin: 60px auto;
+    padding: 26px 22px 22px 22px;
+    background-color: #ffffff;
+    border-radius: 14px;
+    border-top: 5px solid #f2b134;
+}
+
+.janela h2 {
+    margin: 0 0 18px 12px;
+    font-size: 20px;
+    color: #0b3f3c;
+}
+
+.campo {
+    float: left;
+    width: 48%;
+    margin: 0 1% 14px 1%;
+}
+
+.campo label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #3f5654;
+}
+
+.campo input[type=text],
+.campo input[type=email],
+.campo input[type=number],
+.campo input[type=datetime-local],
+.campo select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #b8cccb;
+    border-radius: 8px;
     font: inherit;
 }
 
-
-/* 
-   8. MENSAGENS
-*/
-.msg {
-    margin-bottom: 14px;
-    padding: 10px 12px;
+.rodape-modal {
+    margin-top: 6px;
+    padding: 16px 12px 0 12px;
+    text-align: right;
+    border-top: 1px solid #e1eaea;
 }
 
-.msg.ok {
+.rodape-modal button {
+    margin-left: 8px;
+}
+
+
+/* ==========================================================
+   9. AVISOS
+   ========================================================== */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    max-width: 380px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.toast.ok {
     color: #1f5a22;
-    background-color: #dff1df;
+    background-color: #d6f0d8;
+    border-left: 5px solid #2f7d32;
 }
 
-.msg.erro {
+.toast.erro {
     color: #8a2a20;
     background-color: #f8dcd8;
+    border-left: 5px solid #b3382c;
 }
 
 
-/* 
-   9. TABELA
- */
-.tabela {
-    width: 100%;
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    padding: 8px;
-    font-weight: normal;
-    text-align: left;
-    color: #ffffff;
-    background-color: #0e5f5a;
-}
-
-td {
-    padding: 8px;
-    border-bottom: 1px solid #d5e1df;
-    vertical-align: top;
-}
-
-.vazio {
-    padding: 14px;
-    color: #5b6f6d;
-}
-
-
-/* 
+/* ==========================================================
    10. RESPONSIVO
-   Em telas pequenas, um campo por linha
- */
-@media (max-width: 700px) {
+   Em telas pequenas o menu vai para o topo
+   ========================================================== */
+@media (max-width: 900px) {
+    .menu {
+        position: static;
+        width: 100%;
+    }
+
+    .menu-rodape {
+        display: none;
+    }
+
+    .conteudo {
+        margin-left: 0;
+        padding: 20px 16px;
+    }
+
+    .card-resumo {
+        float: none;
+        width: 100%;
+        margin: 0 0 10px 0;
+    }
+
+    .barra input {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
     .campo {
         width: 98%;
     }
